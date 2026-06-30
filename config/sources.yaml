@@ -1,0 +1,28 @@
+youtube:
+  video_ids:
+    - pGntmcy_HX8
+    - JPXgCGaqreA
+    - Ulipm6IckyE
+    - Og_nwXhAeeA
+    - Q8W2IGiSdhc
+  max_comments_per_video: 500
+
+google_play:
+  app_id: com.spotify.music
+  lang: en
+  country: in
+  count: 2000   # fetch up to 2000 newest reviews then filter by date
+  days: 14      # keep only reviews from the last 14 days
+
+spotify_community:
+  urls:
+    - https://community.spotify.com/t5/Live-Ideas/Bring-back-broader-discovery-in-Discover-Weekly-less-genre/idi-p/7411990
+    - https://community.spotify.com/t5/Your-Library/Resetting-Discover-Weekly/td-p/4885105
+    - https://community.spotify.com/t5/Content-Questions/Why-does-the-Discover-Weekly-list-not-reflect-the-music-I-am/td-p/6459020
+
+hacker_news:
+  item_ids:
+    - 41109882
+    - 48600236
+    - 48297632
+    - 36907504

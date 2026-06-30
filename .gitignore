@@ -1,0 +1,17 @@
+.env
+.venv/
+__pycache__/
+*.pyc
+*.pyo
+*.egg-info/
+dist/
+build/
+data/raw/
+data/clean/
+data/enriched/
+data/reviews.db
+data/chroma/
+# snapshot is committed so Render can seed the DB on first boot
+!data/insights_snapshot.json
+.pytest_cache/
+.ruff_cache/
