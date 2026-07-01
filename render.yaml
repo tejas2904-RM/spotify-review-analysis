@@ -26,6 +26,8 @@ services:
         value: data
       - key: LOG_LEVEL
         value: INFO
-      # ── ALLOWED_ORIGINS: add your Vercel URL after Phase 8 deploy ──────────
-      # - key: ALLOWED_ORIGINS
-      #   value: https://your-app.vercel.app
+      # ── CORS: comma-separated list of allowed frontend origins ──────────────
+      # Update this to your exact Vercel URL after first deploy, e.g.:
+      #   https://spotify-review-analysis.vercel.app
+      - key: ALLOWED_ORIGINS
+        value: https://spotify-review-analysis.vercel.app

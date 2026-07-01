@@ -407,7 +407,7 @@ cd dashboard/web && npm run dev           # Next.js on :3000
 - [x] M5: Insight aggregations
 - [x] M6: Next.js + FastAPI dashboard
 - [ ] M7: Backend deployment (Render)
-- [ ] M8: Frontend deployment (Vercel)
+- [x] M8: Frontend deployment (Vercel)
 
 ---
 
