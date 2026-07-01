@@ -5,34 +5,27 @@ services:
     region: oregon
     plan: free
 
-    # Build: install only the lightweight API requirements
     buildCommand: pip install -r requirements-api.txt
 
-    # Start: bind to $PORT (Render injects this) and serve from project root
     startCommand: uvicorn dashboard.api.main:app --host 0.0.0.0 --port $PORT
 
     healthCheckPath: /api/health
 
     envVars:
-      # ── Set these in the Render dashboard (not committed) ──────────────────
+      # ── Set these in the Render dashboard (never commit real keys) ──────────
+      - key: OPENAI_API_KEY
+        sync: false
       - key: GROQ_API_KEY
         sync: false
       - key: YOUTUBE_API_KEY
         sync: false
-      # ── Set automatically via render.yaml ──────────────────────────────────
+      # ── Paths — relative to app root (ephemeral FS on free tier) ───────────
       - key: DB_URL
-        value: sqlite:////data/reviews.db   # absolute path on persistent disk
+        value: sqlite:///data/reviews.db
       - key: DATA_DIR
-        value: /data
-      - key: CHROMA_DIR
-        value: /data/chroma
+        value: data
       - key: LOG_LEVEL
         value: INFO
       # ── ALLOWED_ORIGINS: add your Vercel URL after Phase 8 deploy ──────────
       # - key: ALLOWED_ORIGINS
       #   value: https://your-app.vercel.app
-
-    disk:
-      name: spotify-data
-      mountPath: /data
-      sizeGB: 1
