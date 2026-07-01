@@ -1,8 +1,7 @@
 import { api } from "@/lib/api";
 import SentimentDonut from "@/components/charts/SentimentDonut";
 import SentimentTimeline from "@/components/charts/SentimentTimeline";
-import SentimentBadge from "@/components/SentimentBadge";
-import { BarChart2 } from "lucide-react";
+import { TrendingUp, TrendingDown, Minus, Filter } from "lucide-react";
 
 export const dynamic = "force-dynamic";
 
@@ -13,89 +12,147 @@ export default async function SentimentPage() {
   const overall = data.overall ?? {};
   const bySource = data.by_source ?? {};
   const overTime = data.over_time ?? {};
-
   const pct = overall.percentages ?? {};
+  const counts = overall.counts ?? {};
 
   return (
-    <div className="space-y-8">
-      <div>
-        <h1 className="text-3xl font-bold text-sp-white">Sentiment Analysis</h1>
-        <p className="text-sp-light-gray text-sm mt-1">How users feel about Spotify across all sources</p>
+    <div className="space-y-6">
+
+      {/* KPI row — styled like mockup */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        {/* Positive */}
+        <div className="glass-card p-5">
+          <div className="flex items-center justify-between mb-1">
+            <p className="text-xs font-semibold uppercase tracking-wider" style={{ color: "#555555" }}>Positive Sentiment</p>
+            <TrendingUp size={16} style={{ color: "#1DB954" }} />
+          </div>
+          <p className="text-4xl font-bold mt-2" style={{ color: "#1DB954" }}>{pct.positive ?? 0}%</p>
+          <div className="mt-3 h-1 rounded-full" style={{ background: "#2a2a2a" }}>
+            <div className="h-1 rounded-full" style={{ width: `${pct.positive ?? 0}%`, background: "#1DB954" }} />
+          </div>
+          <p className="text-xs mt-2" style={{ color: "#999999" }}>{counts.positive?.toLocaleString() ?? 0} reviews</p>
+        </div>
+
+        {/* Neutral */}
+        <div className="glass-card p-5">
+          <div className="flex items-center justify-between mb-1">
+            <p className="text-xs font-semibold uppercase tracking-wider" style={{ color: "#555555" }}>Neutral Sentiment</p>
+            <Minus size={16} style={{ color: "#999999" }} />
+          </div>
+          <p className="text-4xl font-bold mt-2 text-white">{pct.neutral ?? 0}%</p>
+          <div className="mt-3 h-1 rounded-full" style={{ background: "#2a2a2a" }}>
+            <div className="h-1 rounded-full" style={{ width: `${pct.neutral ?? 0}%`, background: "#999999" }} />
+          </div>
+          <p className="text-xs mt-2" style={{ color: "#999999" }}>{counts.neutral?.toLocaleString() ?? 0} reviews</p>
+        </div>
+
+        {/* Negative */}
+        <div className="glass-card p-5">
+          <div className="flex items-center justify-between mb-1">
+            <p className="text-xs font-semibold uppercase tracking-wider" style={{ color: "#555555" }}>Negative Sentiment</p>
+            <TrendingDown size={16} style={{ color: "#E84040" }} />
+          </div>
+          <p className="text-4xl font-bold mt-2" style={{ color: "#E84040" }}>{pct.negative ?? 0}%</p>
+          <div className="mt-3 h-1 rounded-full" style={{ background: "#2a2a2a" }}>
+            <div className="h-1 rounded-full" style={{ width: `${pct.negative ?? 0}%`, background: "#E84040" }} />
+          </div>
+          <p className="text-xs mt-2" style={{ color: "#999999" }}>{counts.negative?.toLocaleString() ?? 0} reviews</p>
+        </div>
       </div>
 
-      {/* Overall row */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        <div className="bg-sp-dark rounded-sp p-6 flex flex-col items-center">
-          <p className="text-sp-light-gray text-xs font-semibold uppercase tracking-wider mb-4">Overall Split</p>
+      {/* Distribution + Trends */}
+      <div className="grid grid-cols-1 lg:grid-cols-5 gap-5">
+        <div className="glass-card p-6 flex flex-col items-center lg:col-span-2">
+          <p className="text-sm font-semibold text-white w-full mb-1">Distribution</p>
+          <p className="text-xs w-full mb-5" style={{ color: "#999999" }}>Net score: {overall.avg_score?.toFixed(1) ?? "—"}</p>
           <SentimentDonut
             positive={pct.positive ?? 0}
             neutral={pct.neutral ?? 0}
             negative={pct.negative ?? 0}
           />
-          <p className="text-sp-light-gray text-xs mt-2">{overall.total?.toLocaleString() ?? 0} reviews</p>
-        </div>
-
-        {/* Stat boxes */}
-        <div className="lg:col-span-2 grid grid-cols-3 gap-4 content-center">
-          {[
-            { label: "Positive", val: pct.positive, color: "text-sp-green",    count: overall.counts?.positive },
-            { label: "Neutral",  val: pct.neutral,  color: "text-sp-light-gray",count: overall.counts?.neutral },
-            { label: "Negative", val: pct.negative, color: "text-sp-negative",  count: overall.counts?.negative },
-          ].map(({ label, val, color, count }) => (
-            <div key={label} className="bg-sp-gray rounded-sp p-5 text-center">
-              <p className={`text-4xl font-bold ${color}`}>{val ?? 0}%</p>
-              <p className="text-sp-light-gray text-xs mt-1">{label}</p>
-              <p className="text-sp-mid-gray text-xs">{count?.toLocaleString() ?? 0} reviews</p>
-            </div>
-          ))}
-          <div className="col-span-3 bg-sp-gray rounded-sp p-5">
-            <p className="text-sp-light-gray text-xs font-semibold uppercase tracking-wider mb-1">Avg Sentiment Score</p>
-            <p className="text-3xl font-bold text-sp-white">{overall.avg_score?.toFixed(3) ?? "—"}</p>
-            <p className="text-sp-mid-gray text-xs">0 = strongly negative · 1 = strongly positive</p>
+          <div className="flex gap-4 mt-4">
+            {[
+              { label: "Positive", val: counts.positive, color: "#1DB954" },
+              { label: "Neutral",  val: counts.neutral,  color: "#999999" },
+              { label: "Negative", val: counts.negative, color: "#E84040" },
+            ].map(({ label, val, color }) => (
+              <div key={label} className="text-center">
+                <div className="flex items-center gap-1 mb-0.5">
+                  <div className="w-2 h-2 rounded-full" style={{ background: color }} />
+                  <span className="text-xs" style={{ color: "#999999" }}>{label}</span>
+                </div>
+                <p className="text-sm font-bold text-white">{val?.toLocaleString() ?? 0}</p>
+              </div>
+            ))}
           </div>
         </div>
+
+        {Object.keys(overTime).length > 0 ? (
+          <div className="glass-card p-6 lg:col-span-3">
+            <p className="text-sm font-semibold text-white mb-1">Sentiment Trends</p>
+            <p className="text-xs mb-4" style={{ color: "#999999" }}>Monthly trend by label</p>
+            <SentimentTimeline overTime={overTime} />
+          </div>
+        ) : (
+          <div className="glass-card p-6 lg:col-span-3 flex items-center justify-center">
+            <p className="text-sm" style={{ color: "#555555" }}>No timeline data yet</p>
+          </div>
+        )}
       </div>
 
-      {/* Timeline */}
-      {Object.keys(overTime).length > 0 && (
-        <div className="bg-sp-dark rounded-sp p-6">
-          <h2 className="text-sp-white font-semibold mb-1 flex items-center gap-2">
-            <BarChart2 size={16} className="text-sp-green" /> Sentiment Over Time
-          </h2>
-          <p className="text-sp-light-gray text-xs mb-4">Monthly trend by sentiment label</p>
-          <SentimentTimeline overTime={overTime} />
+      {/* Sentiment by Source */}
+      <div className="glass-card p-6">
+        <div className="flex items-center justify-between mb-4">
+          <div>
+            <p className="text-sm font-semibold text-white">Sentiment by Source</p>
+            <p className="text-xs mt-0.5" style={{ color: "#999999" }}>
+              Breakdown of user perception across primary channels
+            </p>
+          </div>
+          <button className="flex items-center gap-1.5 px-3 py-1.5 rounded-sp-sm text-xs font-medium transition-colors hover:bg-[#222222]"
+                  style={{ color: "#999999", border: "1px solid #2a2a2a" }}>
+            <Filter size={12} /> Filter Channels
+          </button>
         </div>
-      )}
-
-      {/* By source */}
-      <div className="bg-sp-dark rounded-sp p-6">
-        <h2 className="text-sp-white font-semibold mb-4">Sentiment by Source</h2>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div className="space-y-4">
           {Object.entries(bySource).map(([source, info]: [string, any]) => {
             const sp = info.percentages ?? {};
+            const posW = sp.positive ?? 0;
             return (
-              <div key={source} className="bg-sp-gray rounded-sp p-4">
-                <div className="flex items-center justify-between mb-3">
-                  <p className="text-sp-white text-sm font-semibold capitalize">{source.replace(/_/g, " ")}</p>
-                  <span className="text-sp-light-gray text-xs">{info.total} reviews</span>
+              <div key={source} className="flex items-center gap-4">
+                <div className="w-8 h-8 rounded-sp-sm flex items-center justify-center shrink-0"
+                     style={{ background: "#222222" }}>
+                  <span className="text-xs font-bold" style={{ color: "#1DB954" }}>
+                    {source[0].toUpperCase()}
+                  </span>
                 </div>
-                <div className="flex h-2 rounded-full overflow-hidden gap-0.5">
-                  <div style={{ width: `${sp.positive ?? 0}%` }} className="bg-sp-green rounded-l-full" />
-                  <div style={{ width: `${sp.neutral ?? 0}%` }}  className="bg-sp-light-gray" />
-                  <div style={{ width: `${sp.negative ?? 0}%` }} className="bg-sp-negative rounded-r-full" />
+                <p className="w-32 text-sm capitalize shrink-0 text-white">
+                  {source.replace(/_/g, " ")}
+                </p>
+                <div className="flex-1 flex h-2.5 rounded-full overflow-hidden gap-px">
+                  <div style={{ width: `${posW}%`,         background: "#1DB954" }} />
+                  <div style={{ width: `${sp.neutral ?? 0}%`, background: "#2a2a2a" }} />
+                  <div style={{ width: `${sp.negative ?? 0}%`, background: "#E84040" }} />
                 </div>
-                <div className="flex gap-4 mt-2">
-                  {["positive", "neutral", "negative"].map((s) => (
-                    <span key={s} className="text-xs text-sp-light-gray">
-                      {sp[s] ?? 0}% {s}
-                    </span>
-                  ))}
-                </div>
+                <p className="w-10 text-right text-sm font-semibold text-white">{posW}%</p>
               </div>
             );
           })}
         </div>
+        {/* Legend */}
+        <div className="flex gap-6 mt-5 pt-4" style={{ borderTop: "1px solid #2a2a2a" }}>
+          {[["#1DB954","Positive Feedback"],["#2a2a2a","Neutral"],["#E84040","Negative/Critical"]].map(([c,l]) => (
+            <div key={l} className="flex items-center gap-1.5">
+              <div className="w-2.5 h-2.5 rounded-full" style={{ background: c }} />
+              <span className="text-xs" style={{ color: "#999999" }}>{l}</span>
+            </div>
+          ))}
+        </div>
       </div>
+
+      <p className="text-center text-xs pb-4" style={{ color: "#555555" }}>
+        © 2026 ReviewAnalytics Platform. All data real-time via API.
+      </p>
     </div>
   );
 }

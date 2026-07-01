@@ -1,35 +1,48 @@
 @import "tailwindcss";
 
 :root {
-  --sp-black: #121212;
-  --sp-dark: #181818;
-  --sp-card: #232323;
-  --sp-gray: #282828;
-  --sp-green: #1DB954;
-}
-
-* {
-  box-sizing: border-box;
+  --sp-black:      #0d0d0d;
+  --sp-sidebar:    #111111;
+  --sp-dark:       #161616;
+  --sp-card:       #1c1c1c;
+  --sp-gray:       #222222;
+  --sp-border:     #2a2a2a;
+  --sp-mid-gray:   #555555;
+  --sp-light-gray: #999999;
+  --sp-white:      #ffffff;
+  --sp-green:      #1DB954;
+  --sp-green-h:    #1ed760;
+  --sp-negative:   #E84040;
+  --sp-warning:    #F59E0B;
 }
 
 html, body {
   background-color: var(--sp-black);
-  color: #FFFFFF;
-  font-family: 'Inter', ui-sans-serif, system-ui, sans-serif;
-  margin: 0;
-  padding: 0;
+  color: var(--sp-white);
+  font-family: var(--font-inter), ui-sans-serif, system-ui, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
 
 /* Scrollbar */
-::-webkit-scrollbar { width: 8px; height: 8px; }
-::-webkit-scrollbar-track { background: var(--sp-black); }
-::-webkit-scrollbar-thumb { background: #535353; border-radius: 4px; }
-::-webkit-scrollbar-thumb:hover { background: #B3B3B3; }
+::-webkit-scrollbar { width: 6px; height: 6px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: var(--sp-border); border-radius: 3px; }
+::-webkit-scrollbar-thumb:hover { background: var(--sp-mid-gray); }
 
-/* Recharts tooltip */
+/* Recharts tooltip dark theme */
 .recharts-tooltip-wrapper .recharts-default-tooltip {
-  background-color: #282828 !important;
-  border: 1px solid #535353 !important;
+  background-color: var(--sp-card) !important;
+  border: 1px solid var(--sp-border) !important;
   border-radius: 8px !important;
-  color: #FFFFFF !important;
+  color: var(--sp-white) !important;
+}
+.recharts-tooltip-label { color: var(--sp-white) !important; }
+.recharts-tooltip-item  { color: var(--sp-light-gray) !important; }
+
+/* Glass card utility */
+.glass-card {
+  background: var(--sp-dark);
+  border: 1px solid var(--sp-border);
+  border-radius: 10px;
 }
