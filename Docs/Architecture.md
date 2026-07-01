@@ -26,7 +26,7 @@ This document describes the end-to-end, phase-wise architecture for the **AI-pow
 | Ingestion | Collect raw feedback from each source | Python, Playwright, official/3rd-party APIs |
 | Processing | Clean, deduplicate, normalize, language-detect | Pandas, spaCy, langdetect |
 | Storage | Persist raw + processed data | SQLite, Parquet, ChromaDB |
-| AI / NLP | Sentiment, themes, segmentation, summaries | **Groq — Llama 3.3 70B Versatile**, sentence-transformers |
+| AI / NLP | Sentiment, themes, segmentation, summaries | **OpenAI GPT-4o-mini**, sentence-transformers |
 | Insights | Aggregate, score, rank pain points & opportunities | Python analytics, pandas |
 | Dashboard | Visualize results interactively | **Next.js** (App Router, TypeScript) + FastAPI |
 
@@ -110,30 +110,31 @@ This document describes the end-to-end, phase-wise architecture for the **AI-pow
 **Goal:** Apply LLM/NLP techniques to extract meaning from each review.
 
 ### LLM Provider
-**Groq — Llama 3.3 70B Versatile** (free tier)
-- API: `api.groq.com`, Python library: `groq`
-- Free limits: 30 RPM / 14,400 RPD / 131,072 TPM
+**OpenAI GPT-4o-mini** (pay-as-you-go, ~$0.12 for full dataset)
+- API: `api.openai.com`, Python library: `openai`
+- Limits (paid tier): 500 RPM / 200,000 TPM — effectively no throttling for this workload
 - Structured JSON output via `response_format: {"type": "json_object"}`
 - Response cache keyed by `(prompt_version, text_hash)` in `data/enriched/llm_cache.json`
+- Fallback chain: OpenAI → Gemini 2.0 Flash → Groq Llama 3.3 70B (auto-selected by API key presence)
 
 ### Per-Review Enrichment
 | Task | Technique | Output |
 |------|-----------|--------|
-| Sentiment analysis | Groq Llama 3.3 70B (JSON mode) | `positive / neutral / negative` + score 0–1 |
-| Theme/topic extraction | Groq Llama 3.3 70B (JSON mode) | list of canonical themes |
-| Feature request detection | Groq Llama 3.3 70B (JSON mode) | boolean + extracted request text |
-| Pain point extraction | Groq Llama 3.3 70B (JSON mode) | structured pain point sentence |
-| User segment inference | Groq Llama 3.3 70B + heuristics | `casual / power_user / new_user / churn_risk` |
-| Intent / emotion | Groq Llama 3.3 70B (JSON mode) | frustration, delight, confusion, etc. |
+| Sentiment analysis | GPT-4o-mini (JSON mode) | `positive / neutral / negative` + score 0–1 |
+| Theme/topic extraction | GPT-4o-mini (JSON mode) | list of canonical themes |
+| Feature request detection | GPT-4o-mini (JSON mode) | boolean + extracted request text |
+| Pain point extraction | GPT-4o-mini (JSON mode) | structured pain point sentence |
+| User segment inference | GPT-4o-mini + heuristics | `casual / power_user / new_user / churn_risk` |
+| Intent / emotion | GPT-4o-mini (JSON mode) | frustration, delight, confusion, etc. |
 
 ### Aggregate AI Tasks
 - **Theme clustering** across the full corpus via HDBSCAN on ChromaDB embeddings.
-- **Cluster labeling** — Groq Llama 3.3 70B names each HDBSCAN cluster.
-- **Summarization** — Groq Llama 3.3 70B summaries per theme and per source.
+- **Cluster labeling** — GPT-4o-mini names each HDBSCAN cluster.
+- **Summarization** — GPT-4o-mini summaries per theme and per source.
 - **Pain-point ranking** by frequency × severity × sentiment.
 
 ### Design Considerations
-- **Mini-batching** (5 reviews per LLM call) to maximise throughput within 30 RPM limit.
+- **Mini-batching** (5 reviews per LLM call) to maximise throughput within RPM limits.
 - **Response caching** — re-runs skip already-processed reviews; cache persisted as JSON.
 - **Structured outputs** (JSON mode) for reliability; parsed and validated before DB insert.
 - **Prompt versioning** (`PROMPT_VERSION = "v1.0"`) for reproducibility.

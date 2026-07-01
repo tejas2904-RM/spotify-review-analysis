@@ -12,7 +12,7 @@ This document turns the phase-wise design in [`Architecture.md`](./Architecture.
 | Dashboard | **Next.js** (App Router, TypeScript) + FastAPI | Production-grade UI with full component control |
 | Database (MVP) | SQLite | Zero-setup; swap to PostgreSQL later |
 | Vector store | ChromaDB (local) | Simple, file-based, good for embeddings |
-| LLM provider | **Groq — Llama 3.3 70B Versatile** (free) | Best free-tier quality; structured JSON output; 30 RPM |
+| LLM provider | **OpenAI GPT-4o-mini** | Fast, cheap (~$0.12/full run), reliable JSON output; 500 RPM paid tier |
 | Embeddings | `sentence-transformers` (local) | Free, offline, fast for clustering |
 | Orchestration (MVP) | CLI pipeline (`pipeline.py`) | Airflow/Prefect later if needed |
 
@@ -158,7 +158,7 @@ Implement `src/storage/`:
 Implement `src/ai/`:
 
 ### 6.1 LLM Client (`src/ai/llm.py`)
-- **Groq** client using the `groq` Python library, model `llama-3.3-70b-versatile`.
+- **OpenAI** client using the `openai` Python library, model `gpt-4o-mini`. Falls back to Gemini 2.0 Flash or Groq Llama 3.3 70B if `OPENAI_API_KEY` is absent.
 - Structured JSON output via `response_format: {"type": "json_object"}`, retries with exponential backoff, response caching keyed by `md5(system[:100] + user_prompt)` in `data/enriched/llm_cache.json`.
 - Rate-limit guard: sliding 60-second window capped at 28 RPM (2 RPM headroom).
 
@@ -402,7 +402,7 @@ cd dashboard/web && npm run dev           # Next.js on :3000
 - [x] M1: Hacker News collector
 - [x] M2: Cleaning pipeline
 - [x] M3: Storage + vector store
-- [x] M4: LLM client + per-review enrichment (Groq Llama 3.3 70B)
+- [x] M4: LLM client + per-review enrichment (OpenAI GPT-4o-mini)
 - [x] M4: Embeddings, clustering, summarization
 - [x] M5: Insight aggregations
 - [x] M6: Next.js + FastAPI dashboard

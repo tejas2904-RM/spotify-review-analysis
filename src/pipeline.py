@@ -90,10 +90,10 @@ def run_store() -> None:
 
 
 def run_enrich() -> None:
-    """Phase 4a — per-review AI enrichment via Groq Llama 3.3 70B."""
+    """Phase 4a — per-review AI enrichment via LLM (OpenAI GPT-4o-mini / Gemini / Groq)."""
     from src.ai.enrich import run_enrichment
 
-    logger.info("=== Phase 4a: Per-Review Enrichment (Groq Llama 3.3 70B) ===")
+    logger.info("=== Phase 4a: Per-Review Enrichment (GPT-4o-mini) ===")
     total = run_enrichment()
     logger.info("Enrichment done. %d reviews enriched.", total)
 
@@ -113,7 +113,7 @@ def run_summarize() -> None:
     """Phase 4c — LLM summaries per theme and per source."""
     from src.ai.summarize import run_summarization
 
-    logger.info("=== Phase 4c: Theme & Source Summarization (Groq Llama 3.3 70B) ===")
+    logger.info("=== Phase 4c: Theme & Source Summarization (GPT-4o-mini) ===")
     count = run_summarization()
     logger.info("Summarization done. %d summaries saved.", count)
 
