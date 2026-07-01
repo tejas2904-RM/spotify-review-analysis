@@ -35,8 +35,8 @@ def _label_cluster(sample_texts: list[str]) -> dict:
 
 
 def run_clustering(
-    min_cluster_size: int = 15,
-    min_samples: int = 5,
+    min_cluster_size: int = 5,
+    min_samples: int = 2,
 ) -> dict:
     """Cluster ChromaDB embeddings with HDBSCAN and label each cluster with the LLM.
 
@@ -69,12 +69,18 @@ def run_clustering(
     documents: list[str] = raw["documents"]
     metadatas: list[dict] = raw["metadatas"]
 
-    logger.info("Running HDBSCAN (min_cluster_size=%d, min_samples=%d) …",
+    # Normalise embeddings for cosine similarity (L2-norm → dot product = cosine)
+    norms = np.linalg.norm(embeddings, axis=1, keepdims=True)
+    norms = np.where(norms == 0, 1, norms)
+    embeddings = embeddings / norms
+
+    logger.info("Running HDBSCAN (min_cluster_size=%d, min_samples=%d, metric=cosine) …",
                 min_cluster_size, min_samples)
     clusterer = hdbscan.HDBSCAN(
         min_cluster_size=min_cluster_size,
         min_samples=min_samples,
-        metric="euclidean",
+        metric="euclidean",   # euclidean on L2-normalised vectors == cosine
+        cluster_selection_method="eom",
         core_dist_n_jobs=-1,
     )
     labels: np.ndarray = clusterer.fit_predict(embeddings)
