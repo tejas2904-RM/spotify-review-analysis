@@ -2,7 +2,6 @@ import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import "./globals.css";
 import Sidebar from "@/components/Sidebar";
-import Navbar from "@/components/Navbar";
 
 const inter = Inter({
   subsets: ["latin"],
@@ -12,22 +11,17 @@ const inter = Inter({
 });
 
 export const metadata: Metadata = {
-  title: "ReviewAnalytics — Spotify Insights",
-  description: "AI-powered insights from 1,799 Spotify user reviews",
+  title: "Spotify Review Analysis",
+  description: "AI-powered insights from 1,800+ Spotify user reviews",
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="en">
-      <body className={`${inter.variable} font-spotify antialiased`}
-            style={{ background: "#0d0d0d", color: "#ffffff" }}>
+      <body className={`${inter.variable} bg-sp-black text-white font-spotify antialiased`}>
         <div className="flex h-screen overflow-hidden">
           <Sidebar />
-          <Navbar />
-          <main
-            className="flex-1 overflow-y-auto"
-            style={{ marginLeft: "224px", marginTop: "56px" }}
-          >
+          <main className="ml-56 flex-1 overflow-y-auto bg-gradient-to-b from-sp-dark to-sp-black">
             <div className="max-w-7xl mx-auto px-8 py-8">
               {children}
             </div>

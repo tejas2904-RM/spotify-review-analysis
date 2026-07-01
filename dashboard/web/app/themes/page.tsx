@@ -1,15 +1,9 @@
 import { api } from "@/lib/api";
 import ThemeBar from "@/components/charts/ThemeBar";
-import SentimentTimeline from "@/components/charts/SentimentTimeline";
+import SentimentBadge from "@/components/SentimentBadge";
 import { Hash } from "lucide-react";
 
 export const dynamic = "force-dynamic";
-
-const SENTIMENT_COLOR: Record<string, string> = {
-  positive: "#1DB954",
-  neutral:  "#999999",
-  negative: "#E84040",
-};
 
 export default async function ThemesPage() {
   let data: any = {};
@@ -21,111 +15,78 @@ export default async function ThemesPage() {
   const cooc: any[] = data.cooccurrence ?? [];
 
   return (
-    <div className="space-y-6">
-
-      {/* Theme Frequency — full width */}
-      <div className="glass-card p-6">
-        <p className="text-sm font-semibold text-white mb-1">Theme Frequency</p>
-        <p className="text-xs mb-5" style={{ color: "#999999" }}>
-          Top recurring topics identified across 1,799 reviews
-        </p>
-        {topThemes.length > 0 ? (
-          <ThemeBar data={topThemes.slice(0, 10)} height={280} />
-        ) : (
-          <div className="flex items-center justify-center h-40">
-            <p className="text-sm" style={{ color: "#555555" }}>No theme data yet — run aggregate</p>
-          </div>
-        )}
+    <div className="space-y-8">
+      <div>
+        <h1 className="text-3xl font-bold text-sp-white">Themes Explorer</h1>
+        <p className="text-sp-light-gray text-sm mt-1">What users talk about most — and how they feel about it</p>
       </div>
 
-      {/* Sentiment breakout + co-occurrence */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
-        {/* Theme Sentiment Breakout */}
-        <div className="glass-card p-6">
-          <p className="text-sm font-semibold text-white mb-4">Theme Sentiment Breakout</p>
-          <div className="space-y-3 overflow-y-auto max-h-72">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        {/* Top themes bar */}
+        <div className="bg-sp-dark rounded-sp p-6">
+          <h2 className="text-sp-white font-semibold mb-1">Top Themes by Volume</h2>
+          <p className="text-sp-light-gray text-xs mb-4">Total mentions across all 1,799 reviews</p>
+          <ThemeBar data={topThemes.slice(0, 12)} height={320} />
+        </div>
+
+        {/* Theme sentiment table */}
+        <div className="bg-sp-dark rounded-sp p-6">
+          <h2 className="text-sp-white font-semibold mb-4">Theme × Sentiment</h2>
+          <div className="space-y-2 overflow-y-auto max-h-80">
             {Object.entries(sentBreak)
               .sort((a: any, b: any) => b[1].total - a[1].total)
-              .slice(0, 10)
-              .map(([theme, info]: [string, any]) => {
-                const sp = info.percentages ?? {};
-                return (
-                  <div key={theme}>
-                    <div className="flex items-center justify-between mb-1">
-                      <span className="text-sm capitalize text-white">{theme.replace(/_/g, " ")}</span>
-                      <span className="text-xs" style={{ color: "#555555" }}>{info.total}</span>
-                    </div>
-                    <div className="flex h-2 rounded-full overflow-hidden gap-px">
-                      <div style={{ width: `${sp.positive ?? 0}%`, background: "#1DB954" }} />
-                      <div style={{ width: `${sp.neutral ?? 0}%`,  background: "#555555" }} />
-                      <div style={{ width: `${sp.negative ?? 0}%`, background: "#E84040" }} />
-                    </div>
+              .slice(0, 15)
+              .map(([theme, info]: [string, any]) => (
+                <div key={theme} className="flex items-center justify-between bg-sp-gray rounded-sp px-3 py-2">
+                  <div className="flex items-center gap-2">
+                    <Hash size={12} className="text-sp-green" />
+                    <span className="text-sp-white text-sm capitalize">{theme.replace(/_/g, " ")}</span>
                   </div>
-                );
-              })}
+                  <div className="flex items-center gap-3">
+                    <span className="text-sp-light-gray text-xs">{info.total} mentions</span>
+                    <SentimentBadge value={info.dominant_sentiment} />
+                    <span className="text-sp-negative text-xs w-12 text-right">{info.negativity_rate}% neg</span>
+                  </div>
+                </div>
+              ))}
           </div>
-          <div className="flex gap-5 mt-4 pt-3" style={{ borderTop: "1px solid #2a2a2a" }}>
-            {[["#1DB954","Positive"],["#555555","Neutral"],["#E84040","Negative"]].map(([c,l]) => (
-              <div key={l} className="flex items-center gap-1.5">
-                <div className="w-2 h-2 rounded-full" style={{ background: c }} />
-                <span className="text-xs" style={{ color: "#999999" }}>{l}</span>
+        </div>
+      </div>
+
+      {/* Co-occurrence */}
+      {cooc.length > 0 && (
+        <div className="bg-sp-dark rounded-sp p-6">
+          <h2 className="text-sp-white font-semibold mb-4">Theme Co-occurrence</h2>
+          <p className="text-sp-light-gray text-xs mb-4">Theme pairs that appear together most often</p>
+          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-3">
+            {cooc.slice(0, 10).map((pair: any, i: number) => (
+              <div key={i} className="bg-sp-gray rounded-sp p-3 text-center">
+                <p className="text-sp-green text-xs font-semibold capitalize">{pair.theme_a.replace(/_/g, " ")}</p>
+                <p className="text-sp-mid-gray text-xs my-1">+</p>
+                <p className="text-sp-green text-xs font-semibold capitalize">{pair.theme_b.replace(/_/g, " ")}</p>
+                <p className="text-sp-white text-lg font-bold mt-2">{pair.count}</p>
+                <p className="text-sp-mid-gray text-xs">times</p>
               </div>
             ))}
           </div>
         </div>
+      )}
 
-        {/* Theme Co-occurrence */}
-        <div className="glass-card p-6">
-          <p className="text-sm font-semibold text-white mb-1">Theme Co-occurrence</p>
-          <p className="text-xs mb-4" style={{ color: "#999999" }}>Pairs that appear together most often</p>
-          {cooc.length > 0 ? (
-            <div className="grid grid-cols-2 gap-2 overflow-y-auto max-h-72">
-              {cooc.slice(0, 8).map((pair: any, i: number) => (
-                <div key={i} className="rounded-sp-sm p-3 text-center" style={{ background: "#1c1c1c" }}>
-                  <p className="text-xs font-semibold capitalize" style={{ color: "#1DB954" }}>
-                    {pair.theme_a.replace(/_/g, " ")}
-                  </p>
-                  <p className="text-xs my-0.5" style={{ color: "#555555" }}>+</p>
-                  <p className="text-xs font-semibold capitalize" style={{ color: "#1DB954" }}>
-                    {pair.theme_b.replace(/_/g, " ")}
-                  </p>
-                  <p className="text-xl font-bold text-white mt-2">{pair.count}</p>
-                  <p className="text-xs" style={{ color: "#555555" }}>times</p>
-                </div>
-              ))}
-            </div>
-          ) : (
-            <div className="flex items-center justify-center h-40">
-              <p className="text-sm" style={{ color: "#555555" }}>No co-occurrence data</p>
-            </div>
-          )}
-        </div>
-      </div>
-
-      {/* Volume Trends (themes by source as proxy) */}
-      <div className="glass-card p-6">
-        <p className="text-sm font-semibold text-white mb-1">Themes by Source</p>
-        <p className="text-xs mb-5" style={{ color: "#999999" }}>Distribution of top themes per data source</p>
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+      {/* By source */}
+      <div className="bg-sp-dark rounded-sp p-6">
+        <h2 className="text-sp-white font-semibold mb-4">Themes by Source</h2>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           {Object.entries(bySource).map(([source, themes]: [string, any]) => (
             <div key={source}>
-              <div className="flex items-center gap-2 mb-3">
-                <div className="w-5 h-5 rounded flex items-center justify-center"
-                     style={{ background: "#1DB95418" }}>
-                  <Hash size={11} style={{ color: "#1DB954" }} />
-                </div>
-                <p className="text-sm font-semibold text-white capitalize">{source.replace(/_/g, " ")}</p>
-              </div>
-              <div className="space-y-2">
+              <p className="text-sp-white text-sm font-semibold capitalize mb-2">{source.replace(/_/g, " ")}</p>
+              <div className="space-y-1">
                 {themes.slice(0, 6).map((t: any) => (
-                  <div key={t.theme}>
-                    <div className="flex items-center justify-between mb-0.5">
-                      <span className="text-xs capitalize" style={{ color: "#999999" }}>{t.theme.replace(/_/g, " ")}</span>
-                      <span className="text-xs" style={{ color: "#555555" }}>{t.count}</span>
+                  <div key={t.theme} className="flex items-center gap-2">
+                    <div className="flex-1 bg-sp-gray rounded-full h-1.5">
+                      <div className="bg-sp-green h-1.5 rounded-full" style={{ width: `${Math.min(t.pct_of_source, 100)}%` }} />
                     </div>
-                    <div className="h-1.5 rounded-full" style={{ background: "#2a2a2a" }}>
-                      <div className="h-1.5 rounded-full" style={{ width: `${Math.min(t.pct_of_source, 100)}%`, background: "#1DB954" }} />
-                    </div>
+                    <span className="text-sp-light-gray text-xs w-28 truncate capitalize">{t.theme.replace(/_/g, " ")}</span>
+                    <span className="text-sp-mid-gray text-xs w-10 text-right">{t.count}</span>
                   </div>
                 ))}
               </div>
@@ -133,10 +94,6 @@ export default async function ThemesPage() {
           ))}
         </div>
       </div>
-
-      <p className="text-center text-xs pb-4" style={{ color: "#555555" }}>
-        © 2026 ReviewAnalytics Platform. All data real-time via API.
-      </p>
     </div>
   );
 }
