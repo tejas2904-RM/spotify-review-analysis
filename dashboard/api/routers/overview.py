@@ -35,8 +35,23 @@ def get_overview():
     segments = get_insight("segment_distribution") or {}
     churn = get_insight("churn_signals") or {}
     opportunities = get_insight("product_opportunities") or {}
+    by_source_insight = get_insight("sentiment_by_source") or {}
 
     relevant_total, enriched_count, source_breakdown = _get_counts()
+
+    # Fallback: when DB is empty (e.g. Render ephemeral env), read counts from
+    # the pre-computed sentiment insight that was seeded from the snapshot.
+    if relevant_total == 0 and sentiment:
+        relevant_total = sentiment.get("total", 0)
+        enriched_count = relevant_total  # all reviews were enriched
+
+    if not source_breakdown or source_breakdown.get("total", 0) == 0:
+        source_breakdown = {
+            src: info["total"]
+            for src, info in by_source_insight.items()
+            if isinstance(info, dict) and "total" in info
+        }
+        source_breakdown["total"] = relevant_total
 
     pct = sentiment.get("percentages", {})
     counts = sentiment.get("counts", {})
